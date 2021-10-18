@@ -3,7 +3,7 @@ package sego
 
 import (
 	"bufio"
-	"fmt"
+	"io"
 	"log"
 	"math"
 	"os"
@@ -59,18 +59,20 @@ func (seg *Segmenter) LoadDictionary(files string) {
 
 		// 逐行读入分词
 		for {
-			size, _ := fmt.Fscanln(reader, &text, &freqText, &pos)
-
-			if size == 0 {
-				// 文件结束
+			sT, _, c := reader.ReadLine()
+			if c == io.EOF {
 				break
-			} else if size < 2 {
-				// 无效行
-				continue
-			} else if size == 2 {
-				// 没有词性标注时设为空字符串
-				pos = ""
 			}
+
+			s := string(sT)
+			sp := strings.Split(s, " ")
+			if len(sp) < 3 {
+				continue
+			}
+			l := len(sp)
+			pos = sp[l-1]
+			freqText = sp[l-2]
+			text = strings.Join(sp[:l-2], " ")
 
 			// 解析词频
 			var err error
